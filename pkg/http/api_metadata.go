@@ -100,6 +100,7 @@ func (a *api) onGetMetadata() http.HandlerFunc {
 							Topic:           v.Topic,
 							Metadata:        v.Metadata,
 							DeadLetterTopic: v.DeadLetterTopic,
+							Canary:          v.Canary,
 						}
 
 						if v.Rules != nil && len(v.Rules.Rules) > 0 {
@@ -163,6 +164,7 @@ type metadataResponsePubsubSubscription struct {
 	Metadata        map[string]string                        `json:"metadata,omitempty"`
 	Rules           []metadataResponsePubsubSubscriptionRule `json:"rules,omitempty"`
 	DeadLetterTopic string                                   `json:"deadLetterTopic"`
+	Canary          bool                                     `json:"canary"`
 }
 
 type metadataResponsePubsubSubscriptionRule struct {

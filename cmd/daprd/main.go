@@ -164,6 +164,7 @@ func main() {
 				ComponentsPath:               opts.ComponentsPath,
 				Registry:                     reg,
 				Security:                     sec,
+				CanarySubscriber:             opts.CanarySubscriber,
 			})
 			if rerr != nil {
 				return rerr

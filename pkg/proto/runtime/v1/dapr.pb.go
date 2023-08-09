@@ -3049,6 +3049,7 @@ type PubsubSubscription struct {
 	Metadata        map[string]string        `protobuf:"bytes,3,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	Rules           *PubsubSubscriptionRules `protobuf:"bytes,4,opt,name=rules,proto3" json:"rules,omitempty"`
 	DeadLetterTopic string                   `protobuf:"bytes,5,opt,name=dead_letter_topic,json=deadLetterTopic,proto3" json:"dead_letter_topic,omitempty"`
+	Canary bool                              `protobuf:"bytes,6,opt,name=canary,json=canary,proto3" json:"canary,omitempty"`
 }
 
 func (x *PubsubSubscription) Reset() {

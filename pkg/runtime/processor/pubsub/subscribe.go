@@ -3,7 +3,9 @@ Copyright 2023 The Dapr Authors
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"google.golang.org/grpc"
 
@@ -85,11 +88,6 @@ func (p *pubsub) topicRoutes(ctx context.Context) (map[string]compstore.TopicRou
 
 	topicRoutes := make(map[string]compstore.TopicRoutes)
 
-	if p.channels.AppChannel() == nil {
-		log.Warn("app channel not initialized, make sure -app-port is specified if pubsub subscription is required")
-		return topicRoutes, nil
-	}
-
 	subscriptions, err := p.subscriptions(ctx)
 	if err != nil {
 		return nil, err
@@ -105,20 +103,37 @@ func (p *pubsub) topicRoutes(ctx context.Context) (map[string]compstore.TopicRou
 			Rules:           s.Rules,
 			DeadLetterTopic: s.DeadLetterTopic,
 			BulkSubscribe:   s.BulkSubscribe,
+			Canary:          s.Canary,
 		}
 	}
 
 	if len(topicRoutes) > 0 {
 		for pubsubName, v := range topicRoutes {
 			var topics string
-			for topic := range v {
-				if topics == "" {
-					topics += topic
-				} else {
-					topics += " " + topic
+			var canaryTopics string
+			for topic, e := range v {
+				if e.Canary {
+					if canaryTopics == "" {
+						canaryTopics += topic
+					} else {
+						canaryTopics += " " + topic
+					}
+				}
+
+				if p.channels.AppChannel() != nil {
+					if topics == "" {
+						topics += topic
+					} else {
+						topics += " " + topic
+					}
 				}
 			}
-			log.Infof("app is subscribed to the following topics: [%s] through pubsub=%s", topics, pubsubName)
+			if len(topics) > 0 {
+				log.Infof("app is subscribed to the following topics: [%s] through pubsub=%s", topics, pubsubName)
+			}
+			if len(canaryTopics) > 0 {
+				log.Infof("canary subscription is enabled on the following topics: [%s] through pubsub=%s", canaryTopics, pubsubName)
+			}
 		}
 	}
 	p.compStore.SetTopicRoutes(topicRoutes)
@@ -133,35 +148,72 @@ func (p *pubsub) subscriptions(ctx context.Context) ([]rtpubsub.Subscription, er
 	}
 
 	appChannel := p.channels.AppChannel()
-	if appChannel == nil {
-		log.Warn("app channel not initialized, make sure -app-port is specified if pubsub subscription is required")
-		return nil, nil
-	}
 
 	var (
 		subscriptions []rtpubsub.Subscription
 		err           error
 	)
 
-	// handle app subscriptions
-	if p.isHTTP {
-		subscriptions, err = rtpubsub.GetSubscriptionsHTTP(ctx, appChannel, log, p.resiliency)
-	} else {
-		var conn grpc.ClientConnInterface
-		conn, err = p.grpc.GetAppClient()
-		if err != nil {
-			return nil, fmt.Errorf("error while getting app client: %w", err)
+	// handle app subscriptions, if app channel is initialised
+	if appChannel != nil {
+		if p.isHTTP {
+			subscriptions, err = rtpubsub.GetSubscriptionsHTTP(ctx, appChannel, log, p.resiliency)
+		} else {
+			var conn grpc.ClientConnInterface
+			conn, err = p.grpc.GetAppClient()
+			if err != nil {
+				return nil, fmt.Errorf("error while getting app client: %w", err)
+			}
+			client := runtimev1pb.NewAppCallbackClient(conn)
+			subscriptions, err = rtpubsub.GetSubscriptionsGRPC(ctx, client, log, p.resiliency)
 		}
-		client := runtimev1pb.NewAppCallbackClient(conn)
-		subscriptions, err = rtpubsub.GetSubscriptionsGRPC(ctx, client, log, p.resiliency)
+		if err != nil {
+			return nil, err
+		}
 	}
-	if err != nil {
-		return nil, err
+
+	// inject auto-generated canary subscriber
+	cs := p.autoGenerateCanarySubscriber
+	if cs != "" {
+		parts := strings.Split(cs, ":")
+		if len(parts) != 2 {
+			// TODO: Move this logic as early as possible in the init phase
+			panic("'autoGenerateCanarySubscriber' Should have had two parts")
+		}
+
+		subscriptions = append(subscriptions, rtpubsub.Subscription{
+			PubsubName:      parts[0],
+			Topic:           parts[1],
+			DeadLetterTopic: "",
+			Metadata: map[string]string{
+				"dapr.auto-canary-subscriber": "",
+			},
+			Canary: true,
+			Rules: []*rtpubsub.Rule{
+				{
+					Path: "dapr-canary",
+				},
+			},
+			Scopes: []string{p.id},
+		})
 	}
 
 	// handle declarative subscriptions
 	ds := p.declarativeSubscriptions(ctx)
-	for _, s := range ds {
+
+	// if an app channel is not initialized, only register canary subscribers
+	var fs []rtpubsub.Subscription
+	if appChannel != nil {
+		fs = ds
+	} else {
+		for _, s := range ds {
+			if s.Canary {
+				fs = append(fs, s)
+			}
+		}
+	}
+
+	for _, s := range fs {
 		skip := false
 
 		// don't register duplicate subscriptions

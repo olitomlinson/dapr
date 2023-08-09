@@ -70,14 +70,15 @@ type Options struct {
 	Mode          modes.DaprMode
 	ResourcesPath []string
 
-	Registry       *comppubsub.Registry
-	ComponentStore *compstore.ComponentStore
-	Resiliency     resiliency.Provider
-	Meta           *meta.Meta
-	TracingSpec    *config.TracingSpec
-	GRPC           *manager.Manager
-	Channels       *channels.Channels
-	OperatorClient operatorv1.OperatorClient
+	Registry                     *comppubsub.Registry
+	ComponentStore               *compstore.ComponentStore
+	Resiliency                   resiliency.Provider
+	Meta                         *meta.Meta
+	TracingSpec                  *config.TracingSpec
+	GRPC                         *manager.Manager
+	Channels                     *channels.Channels
+	OperatorClient               operatorv1.OperatorClient
+	AutoGenerateCanarySubscriber string
 }
 
 type pubsub struct {
@@ -101,6 +102,8 @@ type pubsub struct {
 
 	topicCancels map[string]context.CancelFunc
 	outbox       outbox.Outbox
+
+	autoGenerateCanarySubscriber string
 }
 
 type subscribedMessage struct {
@@ -114,21 +117,22 @@ type subscribedMessage struct {
 
 func New(opts Options) *pubsub {
 	ps := &pubsub{
-		id:             opts.ID,
-		namespace:      opts.Namespace,
-		isHTTP:         opts.IsHTTP,
-		podName:        opts.PodName,
-		mode:           opts.Mode,
-		resourcesPath:  opts.ResourcesPath,
-		registry:       opts.Registry,
-		resiliency:     opts.Resiliency,
-		compStore:      opts.ComponentStore,
-		meta:           opts.Meta,
-		tracingSpec:    opts.TracingSpec,
-		grpc:           opts.GRPC,
-		channels:       opts.Channels,
-		operatorClient: opts.OperatorClient,
-		topicCancels:   make(map[string]context.CancelFunc),
+		id:                           opts.ID,
+		namespace:                    opts.Namespace,
+		isHTTP:                       opts.IsHTTP,
+		podName:                      opts.PodName,
+		mode:                         opts.Mode,
+		resourcesPath:                opts.ResourcesPath,
+		registry:                     opts.Registry,
+		resiliency:                   opts.Resiliency,
+		compStore:                    opts.ComponentStore,
+		meta:                         opts.Meta,
+		tracingSpec:                  opts.TracingSpec,
+		grpc:                         opts.GRPC,
+		channels:                     opts.Channels,
+		operatorClient:               opts.OperatorClient,
+		topicCancels:                 make(map[string]context.CancelFunc),
+		autoGenerateCanarySubscriber: opts.AutoGenerateCanarySubscriber,
 	}
 
 	ps.outbox = rtpubsub.NewOutbox(ps.Publish, opts.ComponentStore.GetPubSubComponent, opts.ComponentStore.GetStateStore, ExtractCloudEventProperty, opts.Namespace)

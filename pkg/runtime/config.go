@@ -106,6 +106,7 @@ type Config struct {
 	Metrics                      *metrics.Options
 	Registry                     *registry.Options
 	Security                     security.Handler
+	CanarySubscriber             string
 }
 
 type internalConfig struct {
@@ -134,6 +135,7 @@ type internalConfig struct {
 	config                       []string
 	registry                     *registry.Registry
 	metricsExporter              metrics.Exporter
+	canarySubscriber             string
 }
 
 func (i internalConfig) ActorsEnabled() bool {
@@ -284,8 +286,9 @@ func (c *Config) toInternal() (*internalConfig, error) {
 			HealthCheckHTTPPath: c.AppHealthCheckPath,
 			MaxConcurrency:      c.AppMaxConcurrency,
 		},
-		registry:        registry.New(c.Registry),
-		metricsExporter: metrics.NewExporterWithOptions(log, metrics.DefaultMetricNamespace, c.Metrics),
+		registry:         registry.New(c.Registry),
+		metricsExporter:  metrics.NewExporterWithOptions(log, metrics.DefaultMetricNamespace, c.Metrics),
+		canarySubscriber: c.CanarySubscriber,
 	}
 
 	if len(intc.standalone.ResourcesPath) == 0 && c.ComponentsPath != "" {

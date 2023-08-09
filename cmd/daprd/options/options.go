@@ -72,6 +72,7 @@ type Options struct {
 	AppChannelAddress            string
 	Logger                       logger.Options
 	Metrics                      *metrics.Options
+	CanarySubscriber             string
 }
 
 func New(args []string) *Options {
@@ -117,6 +118,7 @@ func New(args []string) *Options {
 	flag.IntVar(&opts.AppHealthProbeTimeout, "app-health-probe-timeout", int(config.AppHealthConfigDefaultProbeTimeout/time.Millisecond), "Timeout for app health probes in milliseconds")
 	flag.IntVar(&opts.AppHealthThreshold, "app-health-threshold", int(config.AppHealthConfigDefaultThreshold), "Number of consecutive failures for the app to be considered unhealthy")
 	flag.StringVar(&opts.AppChannelAddress, "app-channel-address", runtime.DefaultChannelAddress, "The network address the application listens on")
+	flag.StringVar(&opts.CanarySubscriber, "canary-subscriber", "", "Auto-generates a canary subscriber. use the pattern {PubSubName}:{TopicName}")
 
 	opts.Logger = logger.DefaultOptions()
 	opts.Logger.AttachCmdFlags(flag.StringVar, flag.BoolVar)

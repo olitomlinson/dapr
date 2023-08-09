@@ -88,6 +88,8 @@ type Options struct {
 	Channels *channels.Channels
 
 	OperatorClient operatorv1.OperatorClient
+
+	AutoGenerateCanarySubscriber string
 }
 
 // manager implements the life cycle events of a component category.
@@ -132,20 +134,21 @@ type Processor struct {
 
 func New(opts Options) *Processor {
 	ps := pubsub.New(pubsub.Options{
-		ID:             opts.ID,
-		Namespace:      opts.Namespace,
-		Mode:           opts.Mode,
-		PodName:        opts.PodName,
-		IsHTTP:         opts.IsHTTP,
-		Registry:       opts.Registry.PubSubs(),
-		ComponentStore: opts.ComponentStore,
-		Meta:           opts.Meta,
-		Resiliency:     opts.Resiliency,
-		TracingSpec:    opts.GlobalConfig.Spec.TracingSpec,
-		GRPC:           opts.GRPC,
-		Channels:       opts.Channels,
-		OperatorClient: opts.OperatorClient,
-		ResourcesPath:  opts.Standalone.ResourcesPath,
+		ID:                           opts.ID,
+		Namespace:                    opts.Namespace,
+		Mode:                         opts.Mode,
+		PodName:                      opts.PodName,
+		IsHTTP:                       opts.IsHTTP,
+		Registry:                     opts.Registry.PubSubs(),
+		ComponentStore:               opts.ComponentStore,
+		Meta:                         opts.Meta,
+		Resiliency:                   opts.Resiliency,
+		TracingSpec:                  opts.GlobalConfig.Spec.TracingSpec,
+		GRPC:                         opts.GRPC,
+		Channels:                     opts.Channels,
+		OperatorClient:               opts.OperatorClient,
+		ResourcesPath:                opts.Standalone.ResourcesPath,
+		AutoGenerateCanarySubscriber: opts.AutoGenerateCanarySubscriber,
 	})
 
 	state := state.New(state.Options{

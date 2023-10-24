@@ -173,7 +173,7 @@ func (p *pubsub) subscribeTopic(ctx context.Context, name, topic string, route c
 
 		if route.Canary {
 			if t, ok := cloudEvent[contribpubsub.TypeField]; ok && t == "dapr.canary" {
-				log.Infof("🐦 Canary received! -- CloudEvent Id %s", cloudEvent[contribpubsub.IDField])
+				log.Infof("🐦 Canary received! -- CloudEvent ID %s", cloudEvent[contribpubsub.IDField])
 				return nil
 			}
 			if p.channels.AppChannel() == nil {

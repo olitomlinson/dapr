@@ -116,7 +116,7 @@ func (p *pubsub) topicRoutes(ctx context.Context) (map[string]compstore.TopicRou
 					if canaryTopics == "" {
 						canaryTopics += topic
 					} else {
-						canaryTopics += " " + topic
+						canaryTopics += fmt.Sprintf(" %s", topic)
 					}
 				}
 
@@ -124,7 +124,7 @@ func (p *pubsub) topicRoutes(ctx context.Context) (map[string]compstore.TopicRou
 					if topics == "" {
 						topics += topic
 					} else {
-						topics += " " + topic
+						topics += fmt.Sprintf(" %s", topic)
 					}
 				}
 			}

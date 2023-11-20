@@ -14,6 +14,7 @@ limitations under the License.
 package v2alpha1
 
 import (
+	resiliencyV1alpha "github.com/dapr/dapr/pkg/apis/resiliency/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -49,6 +50,8 @@ type SubscriptionSpec struct {
 	BulkSubscribe BulkSubscribe `json:"bulkSubscribe,omitempty"`
 	// The option to enable a canary subscriber
 	Canary bool `json:"canary"`
+	// The option to specify a resiliency policy just for this subscriber.
+	Resiliency resiliencyV1alpha.InlinePolicy `json:"policies,omitempty" yaml:"policies,omitempty"`
 }
 
 // BulkSubscribe encapsulates the bulk subscription configuration for a topic.

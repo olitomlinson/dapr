@@ -14,6 +14,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	resiliencyV1alpha "github.com/dapr/dapr/pkg/apis/resiliency/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,11 +37,12 @@ type SubscriptionSpec struct {
 	Topic      string `json:"topic"`
 	Pubsubname string `json:"pubsubname"`
 	// +optional
-	Metadata        map[string]string `json:"metadata,omitempty"`
-	Route           string            `json:"route"`
-	BulkSubscribe   BulkSubscribe     `json:"bulkSubscribe,omitempty"`
-	DeadLetterTopic string            `json:"deadLetterTopic,omitempty"`
-	Canary          bool              `json:"canary"`
+	Metadata        map[string]string              `json:"metadata,omitempty"`
+	Route           string                         `json:"route"`
+	BulkSubscribe   BulkSubscribe                  `json:"bulkSubscribe,omitempty"`
+	DeadLetterTopic string                         `json:"deadLetterTopic,omitempty"`
+	Canary          bool                           `json:"canary"`
+	Resiliency      resiliencyV1alpha.InlinePolicy `json:"policies,omitempty" yaml:"policies,omitempty"`
 }
 
 // BulkSubscribe encapsulates the bulk subscription configuration for a topic.

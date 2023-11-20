@@ -100,6 +100,8 @@ type (
 		BuiltInPolicy(name BuiltInPolicyName) *PolicyDefinition
 		// PolicyDefined returns true if there's policy that applies to the target.
 		PolicyDefined(target string, policyType PolicyType) (exists bool)
+
+		BuildInboundPolicyFromInlinePolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) *PolicyDefinition
 	}
 
 	// Resiliency encapsulates configuration for timeouts, retries, and circuit breakers.
@@ -814,6 +816,22 @@ func (r *Resiliency) ComponentOutboundPolicy(name string, componentType Componen
 		}
 	}
 	r.addMetricsToPolicy(policyDef, diag.ResiliencyComponentTarget(name, string(componentType)), diag.OutboundPolicyFlowDirection)
+
+	return policyDef
+}
+
+func (r *Resiliency) BuildInboundPolicyFromInlinePolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) *PolicyDefinition {
+	name := "test"
+	policyDef := &PolicyDefinition{
+		log:  r.log,
+		name: "component[" + name + "] output",
+	}
+
+	// TODO : OJT
+	// if inlinePolicy.Timeout != "" {
+	// 	policyDef.t = make(map[string]time.Duration)
+	// 	policyDef.t = r.timeouts[inlinePolicy.Timeout]
+	// }
 
 	return policyDef
 }

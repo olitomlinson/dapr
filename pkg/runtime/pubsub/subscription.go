@@ -1,16 +1,21 @@
 package pubsub
 
-import "fmt"
+import (
+	"fmt"
+
+	resiliencyV1alpha "github.com/dapr/dapr/pkg/apis/resiliency/v1alpha1"
+)
 
 type Subscription struct {
-	PubsubName      string            `json:"pubsubname"`
-	Topic           string            `json:"topic"`
-	DeadLetterTopic string            `json:"deadLetterTopic"`
-	Metadata        map[string]string `json:"metadata"`
-	Rules           []*Rule           `json:"rules,omitempty"`
-	Scopes          []string          `json:"scopes"`
-	BulkSubscribe   *BulkSubscribe    `json:"bulkSubscribe"`
-	Canary          bool              `json:"canary"`
+	PubsubName      string                          `json:"pubsubname"`
+	Topic           string                          `json:"topic"`
+	DeadLetterTopic string                          `json:"deadLetterTopic"`
+	Metadata        map[string]string               `json:"metadata"`
+	Rules           []*Rule                         `json:"rules,omitempty"`
+	Scopes          []string                        `json:"scopes"`
+	BulkSubscribe   *BulkSubscribe                  `json:"bulkSubscribe"`
+	Canary          bool                            `json:"canary"`
+	Resiliency      *resiliencyV1alpha.InlinePolicy `json:"resiliency"`
 }
 
 type BulkSubscribe struct {

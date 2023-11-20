@@ -50,6 +50,12 @@ type Policies struct {
 	CircuitBreakers map[string]CircuitBreaker `json:"circuitBreakers,omitempty" yaml:"circuitBreakers,omitempty"`
 }
 
+type InlinePolicy struct {
+	Timeout        string         `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	Retry          Retry          `json:"retry,omitempty" yaml:"retry,omitempty"`
+	CircuitBreaker CircuitBreaker `json:"circuitBreaker,omitempty" yaml:"circuitBreaker,omitempty"`
+}
+
 type Retry struct {
 	Policy      string `json:"policy,omitempty" yaml:"policy,omitempty"`
 	Duration    string `json:"duration,omitempty" yaml:"duration,omitempty"`

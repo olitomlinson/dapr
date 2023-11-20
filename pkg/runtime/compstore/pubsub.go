@@ -15,6 +15,7 @@ package compstore
 
 import (
 	"github.com/dapr/components-contrib/pubsub"
+	resiliencyV1alpha "github.com/dapr/dapr/pkg/apis/resiliency/v1alpha1"
 	rtpubsub "github.com/dapr/dapr/pkg/runtime/pubsub"
 )
 
@@ -37,6 +38,7 @@ type TopicRouteElem struct {
 	DeadLetterTopic string
 	BulkSubscribe   *rtpubsub.BulkSubscribe
 	Canary          bool
+	Resiliency      resiliencyV1alpha.InlinePolicy
 }
 
 func (c *ComponentStore) AddPubSub(name string, item PubsubItem) {

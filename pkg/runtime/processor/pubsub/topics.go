@@ -58,6 +58,9 @@ func (p *pubsub) subscribeTopic(ctx context.Context, name, topic string, route c
 
 	ctx, cancel := context.WithCancel(ctx)
 	policyDef := p.resiliency.ComponentInboundPolicy(name, resiliency.Pubsub)
+	subscriberPolicyDef := p.resiliency.BuildInboundPolicyFromInlinePolicy(route.Resiliency)
+	log.Infof("🐦 Subscriber resilient policy! -- timeout: %s")
+
 	routeMetadata := route.Metadata
 
 	namespaced := pubSub.NamespaceScoped

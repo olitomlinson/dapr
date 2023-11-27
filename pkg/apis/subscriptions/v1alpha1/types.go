@@ -42,7 +42,7 @@ type SubscriptionSpec struct {
 	BulkSubscribe   BulkSubscribe                  `json:"bulkSubscribe,omitempty"`
 	DeadLetterTopic string                         `json:"deadLetterTopic,omitempty"`
 	Canary          bool                           `json:"canary"`
-	Resiliency      resiliencyV1alpha.InlinePolicy `json:"policies,omitempty" yaml:"policies,omitempty"`
+	Resiliency      resiliencyV1alpha.InlinePolicy `json:"resiliency,omitempty" yaml:"resiliency,omitempty"`
 }
 
 // BulkSubscribe encapsulates the bulk subscription configuration for a topic.

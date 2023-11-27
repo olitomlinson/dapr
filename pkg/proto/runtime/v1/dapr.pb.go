@@ -3050,6 +3050,7 @@ type PubsubSubscription struct {
 	Rules           *PubsubSubscriptionRules `protobuf:"bytes,4,opt,name=rules,proto3" json:"rules,omitempty"`
 	DeadLetterTopic string                   `protobuf:"bytes,5,opt,name=dead_letter_topic,json=deadLetterTopic,proto3" json:"dead_letter_topic,omitempty"`
 	Canary          bool                     `protobuf:"varint,6,opt,name=canary,proto3" json:"canary,omitempty"`
+	Resiliency		*Resiliency				 `protobug:"bytes,7,opt,name=resiliency,proto3" json:resiliency,omitempty"`
 }
 
 func (x *PubsubSubscription) Reset() {
@@ -3122,6 +3123,13 @@ func (x *PubsubSubscription) GetDeadLetterTopic() string {
 func (x *PubsubSubscription) GetCanary() bool {
 	if x != nil {
 		return x.Canary
+	}
+	return false
+}
+
+func (x *PubsubSubscription) GetResiliency() *Resiliency {
+	if x != nil {
+		return x.Resiliency
 	}
 	return false
 }

@@ -42,6 +42,7 @@ func (s *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 	dst.Spec.DeadLetterTopic = s.Spec.DeadLetterTopic
 	dst.Spec.BulkSubscribe = *convertBulkSubscriptionV2alpha1ToV1alpha1(&s.Spec.BulkSubscribe)
 	dst.Spec.Canary = s.Spec.Canary
+	dst.Spec.Resiliency = s.Spec.Resiliency
 
 	// +kubebuilder:docs-gen:collapse=rote conversion
 	return nil
@@ -81,6 +82,7 @@ func (s *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
 	s.Spec.DeadLetterTopic = src.Spec.DeadLetterTopic
 	s.Spec.BulkSubscribe = *convertBulkSubscriptionV1alpha1ToV2alpha1(&src.Spec.BulkSubscribe)
 	s.Spec.Canary = src.Spec.Canary
+	s.Spec.Resiliency = src.Spec.Resiliency
 
 	// +kubebuilder:docs-gen:collapse=rote conversion
 	return nil

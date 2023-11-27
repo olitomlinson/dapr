@@ -101,7 +101,7 @@ type (
 		// PolicyDefined returns true if there's policy that applies to the target.
 		PolicyDefined(target string, policyType PolicyType) (exists bool)
 
-		BuildInboundPolicyFromInlinePolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) *PolicyDefinition
+		SubscriptionResiliencyPolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) (*PolicyDefinition, bool)
 	}
 
 	// Resiliency encapsulates configuration for timeouts, retries, and circuit breakers.
@@ -820,20 +820,53 @@ func (r *Resiliency) ComponentOutboundPolicy(name string, componentType Componen
 	return policyDef
 }
 
-func (r *Resiliency) BuildInboundPolicyFromInlinePolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) *PolicyDefinition {
-	name := "test"
+func (r *Resiliency) SubscriptionResiliencyPolicy(inlinePolicy resiliencyV1alpha.InlinePolicy) (*PolicyDefinition, bool) {
+	name := "default-subscriber"
 	policyDef := &PolicyDefinition{
 		log:  r.log,
 		name: "component[" + name + "] output",
 	}
 
-	// TODO : OJT
-	// if inlinePolicy.Timeout != "" {
-	// 	policyDef.t = make(map[string]time.Duration)
-	// 	policyDef.t = r.timeouts[inlinePolicy.Timeout]
-	// }
+	r.log.Infof("value of timeout:%s", inlinePolicy.Timeout)
 
-	return policyDef
+	//timeouts
+	if inlinePolicy.Timeout != "" {
+		d, err := parseDuration(inlinePolicy.Timeout)
+		if err != nil {
+			panic(fmt.Errorf("invalid duration %q, %s: %w", name, inlinePolicy.Timeout, err))
+		}
+		policyDef.t = d
+	}
+
+	//circuit breaker
+	if inlinePolicy.CircuitBreaker.Interval != "" {
+		var cb breaker.CircuitBreaker
+		m, err := toMap(inlinePolicy.CircuitBreaker)
+		if err != nil {
+			panic(err)
+		}
+		if err = config.Decode(m, &cb); err != nil {
+
+			panic(fmt.Errorf("invalid retry configuration %q: %w", name, err))
+		}
+		cb.Name = name
+		cb.Initialize(r.log)
+		policyDef.cb = &cb
+	}
+
+	//retry
+	if inlinePolicy.Retry.Duration != "" {
+		rc := retry.DefaultConfig()
+		m, err := toMap(inlinePolicy.Retry)
+		if err != nil {
+			panic(err)
+		}
+		if err = retry.DecodeConfig(&rc, m); err != nil {
+			panic(fmt.Errorf("invalid retry configuration %q: %w", name, err))
+		}
+	}
+
+	return policyDef, inlinePolicy.Timeout != "" && inlinePolicy.CircuitBreaker.Interval != "" && inlinePolicy.CircuitBreaker.Interval != ""
 }
 
 // ComponentInboundPolicy returns the inbound policy for a component.

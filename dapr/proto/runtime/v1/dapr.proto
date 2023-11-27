@@ -643,6 +643,8 @@ message PubsubSubscription {
   PubsubSubscriptionRules rules = 4 [json_name = "rules"];
   string dead_letter_topic = 5 [json_name = "deadLetterTopic"];
   bool canary = 6 [json_name = "canary"];
+  Resiliency resilienct = 7 [json_name = "resiliency"];
+
 }
 
 message PubsubSubscriptionRules {

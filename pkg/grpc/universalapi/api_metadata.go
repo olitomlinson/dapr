@@ -89,6 +89,7 @@ func (a *UniversalAPI) GetMetadata(ctx context.Context, in *runtimev1pb.GetMetad
 			DeadLetterTopic: s.DeadLetterTopic,
 			Rules:           metadataConvertPubSubSubscriptionRules(s.Rules),
 			Canary:          s.Canary,
+			Resiliency:      s.Resiliency,
 		}
 	}
 

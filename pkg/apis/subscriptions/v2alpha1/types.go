@@ -51,7 +51,7 @@ type SubscriptionSpec struct {
 	// The option to enable a canary subscriber
 	Canary bool `json:"canary"`
 	// The option to specify a resiliency policy just for this subscriber.
-	Resiliency resiliencyV1alpha.InlinePolicy `json:"policies,omitempty" yaml:"policies,omitempty"`
+	Resiliency resiliencyV1alpha.InlinePolicy `json:"resiliency,omitempty" yaml:"resiliency,omitempty"`
 }
 
 // BulkSubscribe encapsulates the bulk subscription configuration for a topic.
